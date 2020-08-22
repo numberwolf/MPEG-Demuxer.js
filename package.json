@@ -1,0 +1,16 @@
+{
+  "name": "tsdemuxerjs",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "start": "cp src/demuxer/missilets.wasm ./dist/missilets.wasm && browserify demuxerjs.js > dist/tsdemuxer.js && node server.js",
+    "dev": "nodemon --exec 'npm start -s' --ignore bundle*"
+  },
+  "dependencies": {
+    "browserify": "^16.5.1",
+    "pinipig": "^1.6.1"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.4"
+  }
+}
