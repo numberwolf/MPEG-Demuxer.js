@@ -14,7 +14,10 @@ class TsDemuxerJsClazz {
         	vWidth : 0,
         	vHeight : 0,
         	vFps : 0,
-        	vGop : 0
+        	vGop : 0,
+        	vDuration : 0,
+        	aDuration : 0,
+        	duration : 0
         }
 	}
 
@@ -36,7 +39,8 @@ class TsDemuxerJsClazz {
 	            ModuleTS.cwrap('initTsMissile', 'number', [])();
 	            console.log('Initialized initTsMissile');
 
-	            ModuleTS.cwrap('initializeDemuxer', 'number', ['number'])(0); // 0 hevc
+	            // ModuleTS.cwrap('initializeDemuxer', 'number', ['number'])(0); // (0); 0 hevc
+	            ModuleTS.cwrap('initializeDemuxer', 'number', [])();
 	            console.log('Initialized initializeDemuxer');
 	            
 	            _this.demuxerTsInit(callback);
@@ -81,6 +85,10 @@ class TsDemuxerJsClazz {
         let width = ModuleTS.HEAPU32[ptr / 4 + 2 + 2 + 1];
         let height = ModuleTS.HEAPU32[ptr / 4 + 2 + 2 + 1 + 1];
 
+        let vDuration 	= ModuleTS.HEAPF64[ptr / 8 + 1 + 1 + 1 + 1/2];
+        let aDuration 	= ModuleTS.HEAPF64[ptr / 8 + 1 + 1 + 1 + 1/2 + 1];
+        let duration 	= ModuleTS.HEAPF64[ptr / 8 + 1 + 1 + 1 + 1/2 + 1 + 1];
+
 		this.mediaAttr.sampleRate = a_sample_rate > 0 ? 
 			a_sample_rate : def.DEFAULT_SAMPLERATE;
         this.mediaAttr.sampleChannel = a_channel > 0 ? 
@@ -90,6 +98,10 @@ class TsDemuxerJsClazz {
         this.mediaAttr.vGop = gop;
         this.mediaAttr.vWidth = width;
         this.mediaAttr.vHeight = height;
+
+        this.mediaAttr.vDuration = vDuration;
+        this.mediaAttr.aDuration = aDuration;
+        this.mediaAttr.duration = duration;
 
         // console.log(this.mediaAttr);
 	}
