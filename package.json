@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "",
   "scripts": {
-    "start": "cp src/demuxer/missilets.wasm ./dist/missilets.wasm && browserify demuxerjs.js > dist/tsdemuxer.js && node server.js",
+    "start": "cp src/demuxer/missilets.wasm ./dist/missilets.wasm && browserify ./src/tsdemuxerjs.js > dist/tsdemuxerjs.js && browserify play.js > dist/play.js && node server.js",
     "dev": "nodemon --exec 'npm start -s' --ignore bundle*"
   },
   "dependencies": {
