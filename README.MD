@@ -1,7 +1,5 @@
 --------------------------------------------------
-# h265web.js
-
-<img src="./res/logo@300x300.png" width="300px" />
+# tsdemuxer.js
 
 * Contact: (QQ:531365872 ,Discord:numberwolf#8694)
 
