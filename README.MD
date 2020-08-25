@@ -23,12 +23,10 @@ npm i tsdemuxerjs
 
 - step2. download the wasm(or get it from node_modules)
 
-download from https://github.com/numberwolf/TSDemuxer.js
+> download from https://github.com/numberwolf/TSDemuxer.js
 
-get it from node_modules          
-
-copy it to your js dist dir (which require the tsdemuxerjs)      
-
+> get it from node_modules          
+> copy it to your js dist dir (which require the tsdemuxerjs)      
 ```bash
 cp node_modules/tsdemuxerjs/demuxer/missilets.wasm ./dist/
 ```
