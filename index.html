@@ -16,18 +16,29 @@
             var mediaInfo = demuxer.readMediaInfo();
             console.log(mediaInfo);
             var readData = null;
-            for (var i = 0 ;i < 20; i++) {
+            var vcount = 0;
+            var acount = 0;
+            while(1) {
                 readData = demuxer.readPacket();
-                console.log(readData);
+                if (readData.size <= 0) {
+                    break;
+                }
+                if (readData.type == 0) {
+                    vcount++;
+                } else {
+                    acount++;
+                    console.log(readData.ptime, readData.size);
+                }
             }
+            console.log(vcount, acount);
         };
 
-        var url = "/res/veilside265.ts";
+        var url = "/res/veilside.ts";
         var config = {};
     	var demuxer = makeTsDemuxerJs(url, config);
         demuxer.do(callback);
 
-        
+
         // while (1) {
         //     demuxer.readPacket();
         // }

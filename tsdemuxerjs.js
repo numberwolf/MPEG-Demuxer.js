@@ -42,7 +42,7 @@ class TsDemuxerJsClazz {
 	            // ModuleTS.cwrap('initializeDemuxer', 'number', ['number'])(0); // (0); 0 hevc
 	            ModuleTS.cwrap('initializeDemuxer', 'number', [])();
 	            console.log('Initialized initializeDemuxer');
-	            
+
 	            _this.demuxerTsInit(callback);
 	        };
 	    }
@@ -89,9 +89,9 @@ class TsDemuxerJsClazz {
         let aDuration 	= ModuleTS.HEAPF64[ptr / 8 + 1 + 1 + 1 + 1/2 + 1];
         let duration 	= ModuleTS.HEAPF64[ptr / 8 + 1 + 1 + 1 + 1/2 + 1 + 1];
 
-		this.mediaAttr.sampleRate = a_sample_rate > 0 ? 
+		this.mediaAttr.sampleRate = a_sample_rate > 0 ?
 			a_sample_rate : def.DEFAULT_SAMPLERATE;
-        this.mediaAttr.sampleChannel = a_channel > 0 ? 
+        this.mediaAttr.sampleChannel = a_channel > 0 ?
         	a_channel : def.DEFAULT_CHANNEL;
 
         this.mediaAttr.vFps = fps;
@@ -103,7 +103,7 @@ class TsDemuxerJsClazz {
         this.mediaAttr.aDuration = aDuration;
         this.mediaAttr.duration = duration;
 
-        // console.log(this.mediaAttr);
+        console.log(this.mediaAttr);
 	}
 
 	// outside
@@ -113,7 +113,7 @@ class TsDemuxerJsClazz {
 
 	// outside
 	readPacket() {
-		let ptr = ModuleTS.cwrap('getPacket', 'number', [])(); // 1bytes 
+		let ptr = ModuleTS.cwrap('getPacket', 'number', [])(); // 1bytes
 
 		let type = ModuleTS.HEAPU32[ptr / 4]; // 0 video 1 audio
         let size = ModuleTS.HEAPU32[ptr / 4 + 1]; // 4 bytes 32 bits
@@ -132,8 +132,8 @@ class TsDemuxerJsClazz {
         }
 
         // console.log("readPacket"
-        // 	+ ", type:" + type 
-        // 	+ ", size:" + size 
+        // 	+ ", type:" + type
+        // 	+ ", size:" + size
         // 	+ ", ptime:" + ptime
         // 	+ ", dtime:" + dtime);
         // console.log(dataPacket);
