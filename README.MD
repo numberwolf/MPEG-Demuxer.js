@@ -1,6 +1,8 @@
 --------------------------------------------------
 # tsdemuxer.js
 
+[![npm version](https://badge.fury.io/js/tsdemuxerjs.svg)](https://www.npmjs.com/package/tsdemuxerjs)
+
 * Contact: (QQ:531365872 ,Discord:numberwolf#8694)
 
 * LICENSE : GPL-3.0 https://www.gnu.org/licenses/gpl-3.0.md
