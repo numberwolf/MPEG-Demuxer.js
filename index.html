@@ -15,6 +15,10 @@
         var callback = () => {
             var mediaInfo = demuxer.readMediaInfo();
             console.log(mediaInfo);
+
+            var extInfo = demuxer.readExtensionInfo();
+            console.log(extInfo);
+
             var readData = null;
             var vcount = 0;
             var acount = 0;
@@ -27,10 +31,11 @@
                     vcount++;
                 } else {
                     acount++;
-                    console.log(readData.ptime, readData.size);
+                    // console.log(readData.ptime, readData.size);
                 }
+                console.log(readData);
             }
-            console.log(vcount, acount);
+            // console.log(vcount, acount);
         };
 
         var url = "/res/veilside.ts";

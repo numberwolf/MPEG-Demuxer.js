@@ -11,14 +11,19 @@ class TsDemuxerJsClazz {
         this.mediaAttr = {
         	sampleRate : 0,
         	sampleChannel : 0,
-        	vWidth : 0,
-        	vHeight : 0,
+        	// vWidth : 0,
+        	// vHeight : 0,
         	vFps : 0,
         	vGop : 0,
         	vDuration : 0,
         	aDuration : 0,
         	duration : 0
-        }
+        };
+
+        this.extensionInfo = {
+            vWidth : 0,
+            vHeight : 0,
+        };
 	}
 
 	// outside
@@ -59,16 +64,17 @@ class TsDemuxerJsClazz {
 			// array buffer to unit8array
 			let streamUint8Buf = new Uint8Array(streamBuffer);
 
-			console.log(streamUint8Buf);
-			console.log(streamUint8Buf.length);
+			// console.log(streamUint8Buf);
+			// console.log(streamUint8Buf.length);
 			let offset = ModuleTS._malloc(streamUint8Buf.length)
             ModuleTS.HEAP8.set(streamUint8Buf, offset)
 
             let decRet = ModuleTS.cwrap('demuxBox', 'number', ['number', 'number'])(offset, streamUint8Buf.length)
-            console.log('Run demuxBox : ' + decRet);
+            console.log('Run demux box result : ' + decRet);
 
             if (decRet >= 0) {
             	_this.setMediaInfo();
+                _this.setExtensionInfo();
             	callback();
             }
 		});
@@ -81,13 +87,16 @@ class TsDemuxerJsClazz {
         let a_channel = ModuleTS.HEAPU32[ptr / 4 + 1];
 
         let fps = ModuleTS.HEAPF64[ptr / 8 + 1];
-        let gop = ModuleTS.HEAPU32[ptr / 4 + 2 + 2];
-        let width = ModuleTS.HEAPU32[ptr / 4 + 2 + 2 + 1];
-        let height = ModuleTS.HEAPU32[ptr / 4 + 2 + 2 + 1 + 1];
 
-        let vDuration 	= ModuleTS.HEAPF64[ptr / 8 + 1 + 1 + 1 + 1/2];
-        let aDuration 	= ModuleTS.HEAPF64[ptr / 8 + 1 + 1 + 1 + 1/2 + 1];
-        let duration 	= ModuleTS.HEAPF64[ptr / 8 + 1 + 1 + 1 + 1/2 + 1 + 1];
+		let vDuration = ModuleTS.HEAPF64[ptr / 8 + 1 + 1];
+		let aDuration = ModuleTS.HEAPF64[ptr / 8 + 1 + 1 + 1];
+        let duration  = ModuleTS.HEAPF64[ptr / 8 + 1 + 1 + 1 + 1];
+		// console.log("vDuration:", vDuration);
+
+        let gop = ModuleTS.HEAPU32[ptr / 4 + 2 + 2 + 2 + 2 + 2];
+
+        // let width = ModuleTS.HEAPU32[ptr / 4 + 2 + 2 + 2 + 2 + 2 + 1];
+        // let height = ModuleTS.HEAPU32[ptr / 4 + 2 + 2 + 2 + 2 + 2 + 1 + 1];
 
 		this.mediaAttr.sampleRate = a_sample_rate > 0 ?
 			a_sample_rate : def.DEFAULT_SAMPLERATE;
@@ -96,20 +105,33 @@ class TsDemuxerJsClazz {
 
         this.mediaAttr.vFps = fps;
         this.mediaAttr.vGop = gop;
-        this.mediaAttr.vWidth = width;
-        this.mediaAttr.vHeight = height;
+        // this.mediaAttr.vWidth = width;
+        // this.mediaAttr.vHeight = height;
 
         this.mediaAttr.vDuration = vDuration;
         this.mediaAttr.aDuration = aDuration;
         this.mediaAttr.duration = duration;
 
-        console.log(this.mediaAttr);
+        // console.log(this.mediaAttr);
 	}
+
+    setExtensionInfo() {
+        let ptr = ModuleTS.cwrap('getExtensionInfo', 'number', [])();
+        let width = ModuleTS.HEAPU32[ptr / 4];
+        let height = ModuleTS.HEAPU32[ptr / 4 + 1];
+        this.extensionInfo.vWidth = width;
+        this.extensionInfo.vHeight = height;
+    }
 
 	// outside
 	readMediaInfo() {
 		return this.mediaAttr;
 	}
+
+    // outside
+    readExtensionInfo() {
+        return this.extensionInfo;
+    }
 
 	// outside
 	readPacket() {
