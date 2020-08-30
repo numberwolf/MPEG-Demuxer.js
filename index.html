@@ -33,20 +33,17 @@
                     acount++;
                     // console.log(readData.ptime, readData.size);
                 }
-                console.log(readData);
+                // console.log(readData);
+                // break; // debug
             }
             // console.log(vcount, acount);
         };
 
+        // var url = "/res/veilside264.ts";
         var url = "/res/veilside.ts";
         var config = {};
     	var demuxer = makeTsDemuxerJs(url, config);
         demuxer.do(callback);
-
-
-        // while (1) {
-        //     demuxer.readPacket();
-        // }
 	</script>
 </body>
 </html>

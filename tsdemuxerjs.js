@@ -1,5 +1,5 @@
-var ModuleTS = require('./demuxer/missilets.js');
-var def = require('./consts');
+const ModuleTS = require('./demuxer/missilets.js');
+const def = require('./consts');
 
 class TsDemuxerJsClazz {
 	constructor(videoURL, config) {
@@ -17,7 +17,9 @@ class TsDemuxerJsClazz {
         	vGop : 0,
         	vDuration : 0,
         	aDuration : 0,
-        	duration : 0
+        	duration : 0,
+            aCodec: "",
+            vCodec: ""
         };
 
         this.extensionInfo = {
@@ -48,13 +50,13 @@ class TsDemuxerJsClazz {
 	            ModuleTS.cwrap('initializeDemuxer', 'number', [])();
 	            console.log('Initialized initializeDemuxer');
 
-	            _this.demuxerTsInit(callback);
+	            _this._demuxerTsInit(callback);
 	        };
 	    }
 	}
 
 	// inside
-	demuxerTsInit(callback) {
+	_demuxerTsInit(callback) {
 		let _this = this;
 		fetch(this.videoURL)
 		.then(res => res.arrayBuffer())
@@ -73,15 +75,18 @@ class TsDemuxerJsClazz {
             console.log('Run demux box result : ' + decRet);
 
             if (decRet >= 0) {
-            	_this.setMediaInfo();
-                _this.setExtensionInfo();
+            	_this._setMediaInfo();
+                _this._setExtensionInfo();
             	callback();
             }
 		});
 	}
 
 	// inside
-	setMediaInfo() {
+	_setMediaInfo() {
+        /*
+         * Part 1 media
+         */
 		let ptr = ModuleTS.cwrap('getMediaInfo', 'number', [])();
 		let a_sample_rate = ModuleTS.HEAPU32[ptr / 4];
         let a_channel = ModuleTS.HEAPU32[ptr / 4 + 1];
@@ -113,9 +118,22 @@ class TsDemuxerJsClazz {
         this.mediaAttr.duration = duration;
 
         // console.log(this.mediaAttr);
+        /*
+         * Part 2 Codec
+         */
+        let audioCodecID = ModuleTS.cwrap('getAudioCodecID', 'number', [])();
+        if (audioCodecID >= 0) {
+            this.mediaAttr.aCodec = def.CODEC_OFFSET_TABLE[audioCodecID];
+        }
+        let videoCodecID = ModuleTS.cwrap('getVideoCodecID', 'number', [])();
+        if (videoCodecID >= 0) {
+            this.mediaAttr.vCodec = def.CODEC_OFFSET_TABLE[videoCodecID];
+        }
+        
+        // console.log(this.mediaAttr);
 	}
 
-    setExtensionInfo() {
+    _setExtensionInfo() {
         let ptr = ModuleTS.cwrap('getExtensionInfo', 'number', [])();
         let width = ModuleTS.HEAPU32[ptr / 4];
         let height = ModuleTS.HEAPU32[ptr / 4 + 1];
@@ -133,6 +151,57 @@ class TsDemuxerJsClazz {
         return this.extensionInfo;
     }
 
+    /**
+     * @brief Desc of Packet
+     *        Include : Nalu Layer/VLC Layer
+     */
+    _readLayer() {
+        let naluLayer = {
+            vps : null,
+            sps : null,
+            pps : null,
+            sei : null
+        };
+        let vlcLayer = {
+            vlc : null
+        };
+
+        // nalu layer
+        let spsLen      = ModuleTS.cwrap('getSPSLen', 'number', [])();
+        let spsPtr      = ModuleTS.cwrap('getSPS', 'number', [])();
+        naluLayer.sps   = ModuleTS.HEAPU8.subarray(spsPtr, spsPtr + spsLen);
+
+        let ppsLen      = ModuleTS.cwrap('getPPSLen', 'number', [])();
+        let ppsPtr      = ModuleTS.cwrap('getPPS', 'number', [])();
+        naluLayer.pps   = ModuleTS.HEAPU8.subarray(ppsPtr, ppsPtr + ppsLen);
+
+        let seiLen      = ModuleTS.cwrap('getSEILen', 'number', [])();
+        let seiPtr      = ModuleTS.cwrap('getSEI', 'number', [])();
+        naluLayer.sei   = ModuleTS.HEAPU8.subarray(seiPtr, seiPtr + seiLen);
+
+        // vlc layer
+        let vlcLen      = ModuleTS.cwrap('getVLCLen', 'number', [])();
+        let vlcPtr      = ModuleTS.cwrap('getVLC', 'number', [])();
+        vlcLayer.vlc    = ModuleTS.HEAPU8.subarray(vlcPtr, vlcPtr + vlcLen);
+
+        if (this.mediaAttr.vCodec == "hevc" || this.mediaAttr.vCodec == "h265") {
+            let vpsLen      = ModuleTS.cwrap('getVPSLen', 'number', [])();
+            let vpsPtr      = ModuleTS.cwrap('getVPS', 'number', [])();
+            naluLayer.vps   = ModuleTS.HEAPU8.subarray(vpsPtr, vpsPtr + vpsLen);
+
+            // console.log(vpsLen, vps);
+        } else if (this.mediaAttr.vCodec == "avc" || this.mediaAttr.vCodec == "h264") {
+            // undo
+        } else { // audio
+            // undo
+        }
+
+        return {
+            nalu : naluLayer,
+            vlc : vlcLayer
+        }
+    }
+
 	// outside
 	readPacket() {
 		let ptr = ModuleTS.cwrap('getPacket', 'number', [])(); // 1bytes
@@ -141,17 +210,23 @@ class TsDemuxerJsClazz {
         let size = ModuleTS.HEAPU32[ptr / 4 + 1]; // 4 bytes 32 bits
         let ptime = ModuleTS.HEAPF64[ptr / 8 + 1]; // 8 bytes
         let dtime = ModuleTS.HEAPF64[ptr / 8 + 1 + 1];
+        let keyframe = ModuleTS.HEAPU32[ptr / 4 + 1 + 1 + 2 + 2]; // 4 bytes 32 bits
 
-        let dataPtr = ModuleTS.HEAPU32[ptr / 4 + 1 + 1 + 2 + 2]; // 4bytes ptr
+        let dataPtr = ModuleTS.HEAPU32[ptr / 4 + 1 + 1 + 2 + 2 + 1]; // 4bytes ptr
         let dataPacket = ModuleTS.HEAPU8.subarray(dataPtr, dataPtr + size);
+
+        let layer = this._readLayer();
 
         let returnValue = {
         	type : type,
         	size : size,
         	ptime : ptime,
         	dtime : dtime,
-        	data : dataPacket
+            keyframe : keyframe,
+        	data : dataPacket,
+            layer : layer
         }
+        // console.log(returnValue);
 
         // console.log("readPacket"
         // 	+ ", type:" + type
