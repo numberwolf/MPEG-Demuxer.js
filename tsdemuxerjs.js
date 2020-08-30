@@ -169,25 +169,34 @@ class TsDemuxerJsClazz {
         // nalu layer
         let spsLen      = ModuleTS.cwrap('getSPSLen', 'number', [])();
         let spsPtr      = ModuleTS.cwrap('getSPS', 'number', [])();
-        naluLayer.sps   = ModuleTS.HEAPU8.subarray(spsPtr, spsPtr + spsLen);
+        naluLayer.sps   = new Uint8Array(spsLen);
+        naluLayer.sps.set(ModuleTS.HEAPU8.subarray(spsPtr, spsPtr + spsLen), 0);
+        // console.log(naluLayer.sps);
 
         let ppsLen      = ModuleTS.cwrap('getPPSLen', 'number', [])();
         let ppsPtr      = ModuleTS.cwrap('getPPS', 'number', [])();
-        naluLayer.pps   = ModuleTS.HEAPU8.subarray(ppsPtr, ppsPtr + ppsLen);
+        naluLayer.pps   = new Uint8Array(ppsLen);
+        naluLayer.pps.set(ModuleTS.HEAPU8.subarray(ppsPtr, ppsPtr + ppsLen), 0);
+        // console.log(naluLayer.pps);
 
         let seiLen      = ModuleTS.cwrap('getSEILen', 'number', [])();
         let seiPtr      = ModuleTS.cwrap('getSEI', 'number', [])();
-        naluLayer.sei   = ModuleTS.HEAPU8.subarray(seiPtr, seiPtr + seiLen);
+        naluLayer.sei   = new Uint8Array(seiLen);
+        naluLayer.sei.set(ModuleTS.HEAPU8.subarray(seiPtr, seiPtr + seiLen), 0);
+        // console.log(naluLayer.sei);
 
         // vlc layer
         let vlcLen      = ModuleTS.cwrap('getVLCLen', 'number', [])();
         let vlcPtr      = ModuleTS.cwrap('getVLC', 'number', [])();
-        vlcLayer.vlc    = ModuleTS.HEAPU8.subarray(vlcPtr, vlcPtr + vlcLen);
+        vlcLayer.vlc    = new Uint8Array(vlcLen);
+        vlcLayer.vlc.set(ModuleTS.HEAPU8.subarray(vlcPtr, vlcPtr + vlcLen), 0);
+        // console.log(vlcLayer.vlc);
 
         if (this.mediaAttr.vCodec == "hevc" || this.mediaAttr.vCodec == "h265") {
             let vpsLen      = ModuleTS.cwrap('getVPSLen', 'number', [])();
             let vpsPtr      = ModuleTS.cwrap('getVPS', 'number', [])();
-            naluLayer.vps   = ModuleTS.HEAPU8.subarray(vpsPtr, vpsPtr + vpsLen);
+            naluLayer.vps   = new Uint8Array(vpsLen);
+            naluLayer.vps.set(ModuleTS.HEAPU8.subarray(vpsPtr, vpsPtr + vpsLen), 0);
 
             // console.log(vpsLen, vps);
         } else if (this.mediaAttr.vCodec == "avc" || this.mediaAttr.vCodec == "h264") {
@@ -216,6 +225,8 @@ class TsDemuxerJsClazz {
         let dataPacket = ModuleTS.HEAPU8.subarray(dataPtr, dataPtr + size);
 
         let layer = this._readLayer();
+        // console.log(layer);
+        // console.log("=================================");
 
         let returnValue = {
         	type : type,
