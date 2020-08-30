@@ -1,24 +1,26 @@
 {
-  "name": "tsdemuxerjs",
-  "version": "0.0.8",
-  "description": "A Mpeg-TS Demuxer, with fast speed, you need to get the wasm source from github: https://github.com/numberwolf/TSDemuxer.js, see README.MD",
+  "name": "mpeg.js",
+  "version": "0.0.9",
+  "description": "A Mpeg-TS Demuxer, with fast speed, you need to get the wasm source from github: https://github.com/numberwolf/MPEG-Demuxer.js, see README.MD",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/numberwolf/TSDemuxer.js.git"
+    "url": "git+https://github.com/numberwolf/MPEG-Demuxer.js.git"
   },
   "keywords": [
     "mpegts",
+    "mpeg",
+    "mpeg2",
     "demuxer",
     "wasm",
     "ts",
     "media",
     "play"
   ],
-  "main": "tsdemuxerjs.js",
+  "main": "mpeg.js",
   "author": "numberwolf",
   "license": "GPL-3.0",
   "scripts": {
-    "start": "cp demuxer/missilets.wasm ./dist/missilets.wasm && browserify ./tsdemuxerjs.js -o dist/tsdemuxerjs.js && browserify play.js -o dist/play.js && node server.js",
+    "start": "cp demuxer/missilets.wasm ./dist/missilets.wasm && browserify ./mpeg.js -o dist/mpeg.js && browserify play.js -o dist/play.js && node server.js",
     "dev": "nodemon --exec 'npm start -s' --ignore bundle*"
   },
   "dependencies": {
@@ -30,7 +32,7 @@
     "nodemon": "^2.0.4"
   },
   "bugs": {
-    "url": "https://github.com/numberwolf/TSDemuxer.js/issues"
+    "url": "https://github.com/numberwolf/MPEG-Demuxer.js/issues"
   },
-  "homepage": "https://github.com/numberwolf/TSDemuxer.js#readme"
+  "homepage": "https://github.com/numberwolf/MPEG-Demuxer.js#readme"
 }
