@@ -1,6 +1,6 @@
 {
   "name": "mpeg.js",
-  "version": "0.0.9",
+  "version": "0.1.0",
   "description": "A Mpeg-TS Demuxer, with fast speed, you need to get the wasm source from github: https://github.com/numberwolf/MPEG-Demuxer.js, see README.MD",
   "repository": {
     "type": "git",
