@@ -56,4 +56,8 @@ cp node_modules/mpeg.js/demuxer/missilets.wasm ./dist/
 
 > npm start
 
+```javascript
+const TsDemuxerJs = require('mpeg.js');
+```
+
 ----------------------------------------
