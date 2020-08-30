@@ -12,12 +12,25 @@
 </head>
 <body>
     <script>
-        var callback = () => {
+        var demuxCount = 0;
+        var url264 = "/res/veilside264.ts";
+        var url = "/res/veilside.ts";
+        var config = {};
+        var demuxer = makeTsDemuxerJs(config);
+        demuxer.onReady = () => {
+            demuxer.demuxURL(url);
+        };
+
+        demuxer.onDemuxed = () => {
+            if (demuxCount > 1) {
+                return;
+            }
+            demuxCount += 1;
             var mediaInfo = demuxer.readMediaInfo();
-            console.log(mediaInfo);
+            // console.log(mediaInfo);
 
             var extInfo = demuxer.readExtensionInfo();
-            console.log(extInfo);
+            // console.log(extInfo);
 
             var readData = null;
             var vcount = 0;
@@ -36,14 +49,24 @@
                 console.log(readData);
                 // break; // debug
             }
-            // console.log(vcount, acount);
+            console.log(vcount, acount);
         };
 
-        // var url = "/res/veilside264.ts";
-        var url = "/res/veilside.ts";
-        var config = {};
-    	var demuxer = makeTsDemuxerJs(url, config);
-        demuxer.do(callback);
+        setTimeout(() => {
+            // next
+            console.log("start 264=====================");
+            // demuxer.demuxURL(url);
+            fetch(url264)
+            .then(res => res.arrayBuffer())
+            .then(streamBuffer => {
+                streamBuffer.fileStart = 0;
+                // array buffer to unit8array
+                let streamUint8Buf = new Uint8Array(streamBuffer);
+                demuxer.demuxUint8Buf(streamUint8Buf);
+            });
+        }, 5000);
+
+
 	</script>
 </body>
 </html>

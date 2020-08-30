@@ -12,6 +12,7 @@
 	* get duration of TS
 	* get sample rate/frame rate of TS
 	* get media info
+	* support input data by URI/Uint8 buffer!
 
 [![npm version](https://badge.fury.io/js/mpeg.js.svg)](https://www.npmjs.com/package/mpeg.js)
 

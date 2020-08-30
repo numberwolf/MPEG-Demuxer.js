@@ -2,8 +2,7 @@ const ModuleTS = require('./demuxer/missilets.js');
 const def = require('./consts');
 
 class TsDemuxerJsClazz {
-	constructor(videoURL, config) {
-        this.videoURL = videoURL;
+	constructor(config) {
         this.configFormat = {
         };
 
@@ -26,10 +25,14 @@ class TsDemuxerJsClazz {
             vWidth : 0,
             vHeight : 0,
         };
+
+        this.onReady = null;
+        this.onDemuxed = null;
+        this.do();
 	}
 
 	// outside
-	do(callback) {
+	do() {
 		let _this = this;
         if (!window.WebAssembly) {
             let tip = 'unsupport WASM!';
@@ -43,44 +46,58 @@ class TsDemuxerJsClazz {
 	        ModuleTS.onRuntimeInitialized = () => {
 	            console.log('WASM initialized');
 
-	            ModuleTS.cwrap('initTsMissile', 'number', [])();
-	            console.log('Initialized initTsMissile');
-
-	            // ModuleTS.cwrap('initializeDemuxer', 'number', ['number'])(0); // (0); 0 hevc
-	            ModuleTS.cwrap('initializeDemuxer', 'number', [])();
-	            console.log('Initialized initializeDemuxer');
-
-	            _this._demuxerTsInit(callback);
+                if (_this.onReady != null) {
+                    _this.onReady();
+                }
 	        };
 	    }
 	}
 
+    demuxURL(videoURL) {
+        this._demuxerTsInit(videoURL);
+    }
+
+    demuxUint8Buf(buffer) {
+        this._demuxCore(buffer);
+    }
+
 	// inside
-	_demuxerTsInit(callback) {
+	_demuxerTsInit(videoURL) {
 		let _this = this;
-		fetch(this.videoURL)
+		fetch(videoURL)
 		.then(res => res.arrayBuffer())
 		.then(streamBuffer => {
 			streamBuffer.fileStart = 0;
 
 			// array buffer to unit8array
 			let streamUint8Buf = new Uint8Array(streamBuffer);
-
-			// console.log(streamUint8Buf);
-			// console.log(streamUint8Buf.length);
-			let offset = ModuleTS._malloc(streamUint8Buf.length)
-            ModuleTS.HEAP8.set(streamUint8Buf, offset)
-
-            let decRet = ModuleTS.cwrap('demuxBox', 'number', ['number', 'number'])(offset, streamUint8Buf.length)
-            console.log('Run demux box result : ' + decRet);
-
-            if (decRet >= 0) {
-            	_this._setMediaInfo();
-                _this._setExtensionInfo();
-            	callback();
-            }
+			_this._demuxCore(streamUint8Buf);
 		});
 	}
+
+    _demuxCore(streamUint8Buf) {
+        let _this = this;
+
+        // refresh
+        this._refreshDemuxer();
+
+        // console.log(streamUint8Buf);
+        // console.log(streamUint8Buf.length);
+        let offset = ModuleTS._malloc(streamUint8Buf.length)
+        ModuleTS.HEAP8.set(streamUint8Buf, offset)
+
+        let decRet = ModuleTS.cwrap('demuxBox', 'number', ['number', 'number'])(offset, streamUint8Buf.length)
+        console.log('Run demux box result : ' + decRet);
+
+        if (decRet >= 0) {
+            _this._setMediaInfo();
+            _this._setExtensionInfo();
+
+            if (_this.onDemuxed != null) {
+                _this.onDemuxed();
+            }
+        }
+    }
 
 	// inside
 	_setMediaInfo() {
@@ -248,8 +265,22 @@ class TsDemuxerJsClazz {
         return returnValue;
 	}
 
+    _refreshDemuxer() {
+        this._releaseDemuxer();
+        this._initDemuxer();
+    }
+
+    _initDemuxer() {
+        ModuleTS.cwrap('initTsMissile', 'number', [])();
+        console.log('Initialized initTsMissile');
+
+        // ModuleTS.cwrap('initializeDemuxer', 'number', ['number'])(0); // (0); 0 hevc
+        ModuleTS.cwrap('initializeDemuxer', 'number', [])();
+        console.log('Initialized initializeDemuxer');
+    }
+
 	// outside
-	releaseDemuxer() {
+	_releaseDemuxer() {
 		ModuleTS.cwrap('exitTsMissile', 'number', [])();
 	}
 }
