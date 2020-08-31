@@ -9,8 +9,9 @@ module.exports = {
     DEF_HEVC : "hevc",
     DEF_H264 : "h264",
     DEF_AVC : "avc",
-    CODEC_OFFSET_TABLE : [	"hevc", "h265",
-	                        "avc", "h264",
-	                        "aac", "mp3"
-	                     ]
+    CODEC_OFFSET_TABLE : [	
+	    "hevc", "h265",
+	    "avc", "h264",
+	    "aac", "mp3"
+    ]
 }

@@ -1,13 +1,29 @@
 class AACDecoderClazz {
-	constructor() {
+	constructor(config) {
+		this.sampleRate = config.sampleRate;
+		this.frameDurMs = Math.floor(1024.0 * 1000.0 / this.sampleRate);
+		this.frameDurSec = this.frameDurMs / 1000.0;
+	}
 
+	updateConfig(config) {
+		this.sampleRate = config.sampleRate;
+		this.frameDurMs = 1024.0 * 1000.0 / this.sampleRate;
+		this.frameDurSec = this.frameDurMs / 1000.0;
 	}
 
 	// uint8
-	static sliceAACFrames(dataPacket) {
+	sliceAACFrames(startTime, dataPacket) { // static
+		let _this = this;
+		/*
+		 * [
+		 *		{"ptime" : 0.001, "data" : xxx},
+		 *		...
+		 * ]
+		 */
 		let dataInfo = [];
         // console.log("dataPacket:", dataPacket);
         let startIdx = -1;
+        let startIdxTime = startTime;
         for (let i = 0; i < dataPacket.length - 1; i++) {
             // last frame check
             if (i == dataPacket.length - 2) { // [... , fin - 1 , fin]
@@ -19,7 +35,10 @@ class AACDecoderClazz {
                 let buf = new Uint8Array(len);
                 buf.set(tempBuf, 0);
                 startIdx = i;
-                dataInfo.push(buf);
+                dataInfo.push({
+                	ptime : startIdxTime,
+                	data : buf
+                });
                 break;
             }
 
@@ -37,7 +56,13 @@ class AACDecoderClazz {
                     let buf = new Uint8Array(len);
                     buf.set(tempBuf, 0);
                     startIdx = i;
-                    dataInfo.push(buf);
+                    dataInfo.push({
+                    	ptime : startIdxTime,
+                    	data : buf
+                    });
+                    
+                    // console.log(_this.sampleRate, _this.frameDurMs, _this.frameDurSec);
+                    startIdxTime += _this.frameDurSec;
                 }
             } // end if 0xFF
         } // end for

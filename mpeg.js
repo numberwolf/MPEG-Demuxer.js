@@ -29,6 +29,7 @@ class MPEG_JS_CLAZZ {
 
         this.onReady = null;
         this.onDemuxed = null;
+        this.aacDec = null;
         // this.init();
 	}
 
@@ -147,6 +148,12 @@ class MPEG_JS_CLAZZ {
         if (videoCodecID >= 0) {
             this.mediaAttr.vCodec = def.CODEC_OFFSET_TABLE[videoCodecID];
         }
+
+        if (this.aacDec == null) {
+            this.aacDec = new AACDecoder.AACDecoder(this.mediaAttr);
+        } else {
+            this.aacDec.updateConfig(this.mediaAttr);
+        }
         
         // console.log(this.mediaAttr);
 	}
@@ -249,7 +256,7 @@ class MPEG_JS_CLAZZ {
         // console.log(this.mediaAttr);
         let dataInfo = null
         if (type == 1 && this.mediaAttr.aCodec == def.DEF_AAC) {
-            dataInfo = AACDecoder.AACDecoder.sliceAACFrames(dataPacket);
+            dataInfo = this.aacDec.sliceAACFrames(ptime, dataPacket);
         } else {
             dataInfo = dataPacket;
         }
