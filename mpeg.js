@@ -1,7 +1,7 @@
 const ModuleTS = require('./demuxer/missilets.js');
 const def = require('./consts');
 
-class TsDemuxerJsClazz {
+class MPEG_JS_CLAZZ {
 	constructor(config) {
         this.configFormat = {
         };
@@ -28,11 +28,11 @@ class TsDemuxerJsClazz {
 
         this.onReady = null;
         this.onDemuxed = null;
-        this.do();
+        // this.init();
 	}
 
 	// outside
-	do() {
+	initDemuxer() {
 		let _this = this;
         if (!window.WebAssembly) {
             let tip = 'unsupport WASM!';
@@ -285,7 +285,7 @@ class TsDemuxerJsClazz {
 	}
 }
 
-exports.TsDemuxerJsMod = TsDemuxerJsClazz;
+exports.MPEG_JS = MPEG_JS_CLAZZ;
 
 
 

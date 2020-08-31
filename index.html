@@ -17,7 +17,10 @@
         var url = "/res/veilside.ts";
         var config = {};
         var demuxer = makeTsDemuxerJs(config);
+
+        // bind callback
         demuxer.onReady = () => {
+            // do sth
             demuxer.demuxURL(url);
         };
 
@@ -51,6 +54,9 @@
             }
             console.log(vcount, acount);
         };
+
+        // init demuxer framework
+        demuxer.initDemuxer();
 
         setTimeout(() => {
             // next
