@@ -267,6 +267,7 @@ class MPEG_JS_CLAZZ {
         	ptime : ptime,
         	dtime : dtime,
             keyframe : keyframe,
+            src : dataPacket,
         	data : dataInfo,
             layer : layer
         }

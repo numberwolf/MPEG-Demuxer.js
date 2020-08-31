@@ -11,6 +11,36 @@ class AACDecoderClazz {
 		this.frameDurSec = this.frameDurMs / 1000.0;
 	}
 
+	_getPktLen(u0, u1, u2) {
+	/*
+   ff       f1         50     40       01       7f       fc       --> 01182007
+11111111 11110001 01010000 0100 0000 00000001 01111111 11111100
+|---12bits--|
+                               |
+|------------- 28bits----------|-----------------28 bits-------|
+                                 |00 00000001 011| = pkt length = 1011 = 11 (bytes)
+                                 --------------------------------------------------
+                                 |     ff f1 50 40 01 7f fc 01 18 20 07 <- 11 bytes
+
+   ff       f1              50                 40       01       7f       fc       --> 01182007
+11111111|1111 0  00  1  | 01     0100 0  0|01 0   0  00 [00|00000001|011] 11111|111111  00
+|---12bits--| 1b 2b  1b   2b      4b  1b  3b  1b  1b          13b             11b       2b
+      v       v           v        v              v           v               v
+   syncword  ID          profile  freq           home        pkt_len         fullness
+    */
+
+    	let num1 = (u0 & 0x03) << 11; // 00000011
+    	let num2 = u1 << 3;
+    	let num3 = (u2 & 0xE0) >> 5; // 11100000
+
+    	let pkgLen = num1 + num2 + num3;
+
+    	// console.log("cal pkg len: " , num1 + num2 + num3);
+
+    	return pkgLen;
+
+	}
+
 	// uint8
 	sliceAACFrames(startTime, dataPacket) { // static
 		let _this = this;
@@ -21,51 +51,60 @@ class AACDecoderClazz {
 		 * ]
 		 */
 		let dataInfo = [];
-        // console.log("dataPacket:", dataPacket);
-        let startIdx = -1;
-        let startIdxTime = startTime;
-        for (let i = 0; i < dataPacket.length - 1; i++) {
-            // last frame check
-            if (i == dataPacket.length - 2) { // [... , fin - 1 , fin]
-                // console.log("Get Frame");
-                startIdx = startIdx < 0 ? 0 : startIdx;
+        // console.log("dataPacket:", dataPacket.length);
+        // let defbug_len = 0;
 
-                let len = (dataPacket.length - 1) - startIdx; // between startIdx, lastIdx
-                let tempBuf = dataPacket.subarray(startIdx, i+1);
-                let buf = new Uint8Array(len);
+        // let startIdx = -1;
+        let startIdxTime = startTime;
+
+        for (let i = 0; i < dataPacket.length - 1;) {
+			// if (i == dataPacket.length - 2) { // [... , fin - 1 , fin]
+			// 	// console.log("Get Frame");
+			// 	startIdx = startIdx < 0 ? 0 : startIdx;
+
+			// 	let len = dataPacket.length - startIdx; // between startIdx, lastIdx
+			// 	// defbug_len += len;
+			// 	let tempBuf = dataPacket.subarray(startIdx, i+1);
+			// 	let buf = new Uint8Array(len);
+			// 	buf.set(tempBuf, 0);
+			// 	startIdx = i;
+			// 	dataInfo.push({
+			// 		ptime : startIdxTime,
+			// 		data : buf
+			// 	});
+
+			// 	break;
+			// }
+            // last frame check
+            if (dataPacket[i] == 0xFF && (dataPacket[i+1] >> 4) == 0x0F) {
+
+            	// get aac frame split slice by 0xFFF, but we use 0xFF 0xF1
+	            // @TODO 0xFFF , val >> 4 == 0x0F
+	            // if (dataPacket[i] == 0xFF && dataPacket[i+1] == 0xF1) {
+
+            	let pktLen = _this._getPktLen(dataPacket[i+3], dataPacket[i+4], dataPacket[i+5]);
+            	// console.log(dataPacket[i+pktLen], dataPacket[i+pktLen+1]);
+
+            	// defbug_len += pktLen;
+
+            	let tempBuf = dataPacket.subarray(i, i + pktLen); // [n, m)
+            	let buf = new Uint8Array(pktLen);
                 buf.set(tempBuf, 0);
-                startIdx = i;
+
                 dataInfo.push({
                 	ptime : startIdxTime,
                 	data : buf
                 });
-                break;
-            }
 
-            // get aac frame split slice by 0xFFF, but we use 0xFF 0xF1
-            // @TODO 0xFFF , val >> 4 == 0x0F
-            // if (dataPacket[i] == 0xFF && dataPacket[i+1] == 0xF1) {
-            if (dataPacket[i] == 0xFF && (dataPacket[i+1] >> 4) == 0x0F) {
-                if (startIdx < 0) {
-                    startIdx = i;
-                } else {
-                    // console.log("Get Frame", dataPacket[i+1] >> 8);
-                    let len = i - startIdx;
-                    let tempBuf = dataPacket.subarray(startIdx, i-1);
-                    // console.log("-->d", dataPacket);
-                    let buf = new Uint8Array(len);
-                    buf.set(tempBuf, 0);
-                    startIdx = i;
-                    dataInfo.push({
-                    	ptime : startIdxTime,
-                    	data : buf
-                    });
-                    
-                    // console.log(_this.sampleRate, _this.frameDurMs, _this.frameDurSec);
-                    startIdxTime += _this.frameDurSec;
-                }
-            } // end if 0xFF
+                startIdxTime += _this.frameDurSec;
+
+                i += pktLen;
+            } else {
+            	i += 1;
+            }
         } // end for
+
+        // console.log("debuglen:", defbug_len);
 
         return dataInfo;
 	}
