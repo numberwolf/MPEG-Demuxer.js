@@ -1,4 +1,5 @@
 const ModuleTS = require('./demuxer/missilets.js');
+const AACDecoder = require('./decoder/aac');
 const def = require('./consts');
 
 class MPEG_JS_CLAZZ {
@@ -209,14 +210,14 @@ class MPEG_JS_CLAZZ {
         vlcLayer.vlc.set(ModuleTS.HEAPU8.subarray(vlcPtr, vlcPtr + vlcLen), 0);
         // console.log(vlcLayer.vlc);
 
-        if (this.mediaAttr.vCodec == "hevc" || this.mediaAttr.vCodec == "h265") {
+        if (this.mediaAttr.vCodec == def.DEF_HEVC || this.mediaAttr.vCodec == def.DEF_H265) {
             let vpsLen      = ModuleTS.cwrap('getVPSLen', 'number', [])();
             let vpsPtr      = ModuleTS.cwrap('getVPS', 'number', [])();
             naluLayer.vps   = new Uint8Array(vpsLen);
             naluLayer.vps.set(ModuleTS.HEAPU8.subarray(vpsPtr, vpsPtr + vpsLen), 0);
 
             // console.log(vpsLen, vps);
-        } else if (this.mediaAttr.vCodec == "avc" || this.mediaAttr.vCodec == "h264") {
+        } else if (this.mediaAttr.vCodec == def.DEF_AVC || this.mediaAttr.vCodec == def.DEF_H264) {
             // undo
         } else { // audio
             // undo
@@ -245,13 +246,21 @@ class MPEG_JS_CLAZZ {
         // console.log(layer);
         // console.log("=================================");
 
+        // console.log(this.mediaAttr);
+        let dataInfo = null
+        if (type == 1 && this.mediaAttr.aCodec == def.DEF_AAC) {
+            dataInfo = AACDecoder.AACDecoder.sliceAACFrames(dataPacket);
+        } else {
+            dataInfo = dataPacket;
+        }
+
         let returnValue = {
         	type : type,
         	size : size,
         	ptime : ptime,
         	dtime : dtime,
             keyframe : keyframe,
-        	data : dataPacket,
+        	data : dataInfo,
             layer : layer
         }
         // console.log(returnValue);

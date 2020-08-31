@@ -47,8 +47,14 @@
                     vcount++;
                 } else {
                     acount++;
+                    // console.log(readData);
                     // console.log(readData.ptime, readData.size);
+                    // break; // debug
                 }
+                /*
+                 * Video readData.data is uint8array
+                 * Audio readData.data is list of uint8array
+                 */
                 console.log(readData);
                 // break; // debug
             }
@@ -58,19 +64,19 @@
         // init demuxer framework
         demuxer.initDemuxer();
 
-        setTimeout(() => {
-            // next
-            console.log("start 264=====================");
-            // demuxer.demuxURL(url);
-            fetch(url264)
-            .then(res => res.arrayBuffer())
-            .then(streamBuffer => {
-                streamBuffer.fileStart = 0;
-                // array buffer to unit8array
-                let streamUint8Buf = new Uint8Array(streamBuffer);
-                demuxer.demuxUint8Buf(streamUint8Buf);
-            });
-        }, 5000);
+        // setTimeout(() => {
+        //     // next
+        //     console.log("start 264=====================");
+        //     // demuxer.demuxURL(url);
+        //     fetch(url264)
+        //     .then(res => res.arrayBuffer())
+        //     .then(streamBuffer => {
+        //         streamBuffer.fileStart = 0;
+        //         // array buffer to unit8array
+        //         let streamUint8Buf = new Uint8Array(streamBuffer);
+        //         demuxer.demuxUint8Buf(streamUint8Buf);
+        //     });
+        // }, 5000);
 
 
 	</script>
