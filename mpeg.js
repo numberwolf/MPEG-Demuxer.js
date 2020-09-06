@@ -2,7 +2,7 @@ const ModuleTS = require('./demuxer/missilets.js');
 const AACDecoder = require('./decoder/aac');
 const def = require('./consts');
 
-class MPEG_JS_CLAZZ {
+class MPEG_JS_Module {
 	constructor(config) {
         this.configFormat = {
         };
@@ -302,7 +302,7 @@ class MPEG_JS_CLAZZ {
 	}
 }
 
-exports.MPEG_JS = MPEG_JS_CLAZZ;
+exports.MPEG_JS = MPEG_JS_Module;
 
 
 

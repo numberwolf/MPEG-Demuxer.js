@@ -1,4 +1,4 @@
-class AACDecoderClazz {
+class AACDecoderModule {
 	constructor(config) {
 		this.sampleRate = config.sampleRate;
 		this.frameDurMs = Math.floor(1024.0 * 1000.0 / this.sampleRate);
@@ -110,4 +110,4 @@ class AACDecoderClazz {
 	}
 }
 
-exports.AACDecoder = AACDecoderClazz;
+exports.AACDecoder = AACDecoderModule;
