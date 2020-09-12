@@ -27,10 +27,13 @@ class MPEG_JS_Module {
             vHeight : 0,
         };
 
+        this.wasmState = 0;
+
         this.onReady = null;
         this.onDemuxed = null;
         this.aacDec = null;
         // this.init();
+
 	}
 
 	// outside
@@ -44,15 +47,34 @@ class MPEG_JS_Module {
             alert(tip);
             alert("Please check your browers, it not support wasm! See:https://www.caniuse.com/#search=wasm");
         } else {
-			console.log("to onRuntimeInitialized");
-	        ModuleTS.onRuntimeInitialized = () => {
-	            console.log('WASM initialized');
+			console.log("TSDemuxer to onRuntimeInitialized");
 
-                if (_this.onReady != null) {
+            ModuleTS.run();
+            console.log("run");
+            // ModuleTS.postRun();
+
+            ModuleTS["onRuntimeInitialized"] = () => {
+                console.log('TSDemuxer WASM initialized');
+                if (_this.onReady != null && _this.wasmState == 0) {
+                    _this.wasmState = 1;
+                    console.log("TSDemuxer onready!");
                     _this.onReady();
                 }
-	        };
+            };
+
+            ModuleTS["postRun"] = () => {
+                console.log('TSDemuxer postRun WASM initialized');
+
+                if (_this.onReady != null && _this.wasmState == 0) {
+                    _this.wasmState = 1;
+                    console.log("TSDemuxer postRun onready!");
+                    _this.onReady();
+                }
+            };
+
 	    }
+
+        return true;
 	}
 
     demuxURL(videoURL) {
