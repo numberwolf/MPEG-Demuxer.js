@@ -144,10 +144,10 @@ class MPEG_JS_Module {
         // let width = ModuleTS.HEAPU32[ptr / 4 + 2 + 2 + 2 + 2 + 2 + 1];
         // let height = ModuleTS.HEAPU32[ptr / 4 + 2 + 2 + 2 + 2 + 2 + 1 + 1];
 
-		this.mediaAttr.sampleRate = a_sample_rate > 0 ?
-			a_sample_rate : def.DEFAULT_SAMPLERATE;
-        this.mediaAttr.sampleChannel = a_channel > 0 ?
-        	a_channel : def.DEFAULT_CHANNEL;
+		// this.mediaAttr.sampleRate = a_sample_rate > 0 ?
+		// 	a_sample_rate : def.DEFAULT_SAMPLERATE;
+  //       this.mediaAttr.sampleChannel = a_channel > 0 ?
+  //       	a_channel : def.DEFAULT_CHANNEL;
 
         this.mediaAttr.vFps = fps;
         this.mediaAttr.vGop = gop;
@@ -165,6 +165,13 @@ class MPEG_JS_Module {
         let audioCodecID = ModuleTS.cwrap('getAudioCodecID', 'number', [])();
         if (audioCodecID >= 0) {
             this.mediaAttr.aCodec = def.CODEC_OFFSET_TABLE[audioCodecID];
+            this.mediaAttr.sampleRate = a_sample_rate > 0 ?
+                a_sample_rate : def.DEFAULT_SAMPLERATE;
+            this.mediaAttr.sampleChannel = a_channel > 0 ?
+                a_channel : def.DEFAULT_CHANNEL;
+        } else {
+            this.mediaAttr.sampleRate = 0;
+            this.mediaAttr.sampleChannel = 0;
         }
         let videoCodecID = ModuleTS.cwrap('getVideoCodecID', 'number', [])();
         if (videoCodecID >= 0) {

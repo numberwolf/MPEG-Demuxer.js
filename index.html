@@ -13,8 +13,9 @@
 <body>
     <script>
         var demuxCount = 0;
-        var url264 = "/res/veilside264.ts";
-        var url = "/res/veilside2.ts";
+        // var url264 = "/res/veilside264.ts";
+        // var url = "/res/veilside2.ts";
+        var url = "/res/veilside265_an.ts";
         var config = {};
         var demuxer = makeTsDemuxerJs(config);
 
@@ -30,10 +31,10 @@
             }
             demuxCount += 1;
             var mediaInfo = demuxer.readMediaInfo();
-            // console.log(mediaInfo);
+            console.log(mediaInfo);
 
             var extInfo = demuxer.readExtensionInfo();
-            // console.log(extInfo);
+            console.log(extInfo);
 
             var readData = null;
             var vcount = 0;
@@ -47,10 +48,10 @@
                     vcount++;
                 } else {
                     acount++;
-                    console.log(readData);
                     // console.log(readData.ptime, readData.size);
                     // break; // debug
                 }
+                console.log(readData);
                 /*
                  * Video readData.data is uint8array
                  * Audio readData.data is list of {pts,uint8array}
