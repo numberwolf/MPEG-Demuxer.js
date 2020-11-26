@@ -83,6 +83,9 @@ class AACDecoderModule {
 	            // if (dataPacket[i] == 0xFF && dataPacket[i+1] == 0xF1) {
 
             	let pktLen = _this._getPktLen(dataPacket[i+3], dataPacket[i+4], dataPacket[i+5]);
+                if (pktLen <= 0) {
+                    continue;
+                }
             	// console.log(dataPacket[i+pktLen], dataPacket[i+pktLen+1]);
 
             	// defbug_len += pktLen;
